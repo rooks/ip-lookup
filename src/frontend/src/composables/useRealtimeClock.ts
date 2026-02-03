@@ -1,45 +1,55 @@
-import { ref, onMounted, onUnmounted, watch, type Ref } from 'vue'
+import { ref, onUnmounted, watch, type Ref } from 'vue'
+import { subscribe } from './tickSource'
 
 export function useRealtimeClock(timezone: Ref<string | null>) {
   const time = ref('')
-  let intervalId: number | null = null
+  let unsubscribe: (() => void) | null = null
+  let formatter: Intl.DateTimeFormat | null = null
 
-  function updateTime() {
+  function updateFormatter() {
     if (!timezone.value) {
-      time.value = ''
+      formatter = null
       return
     }
 
     try {
-      const formatter = new Intl.DateTimeFormat('en-US', {
+      formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: timezone.value,
         hour: '2-digit',
         minute: '2-digit',
         second: '2-digit',
         hour12: false,
       })
-      time.value = formatter.format(new Date())
     } catch {
-      time.value = ''
+      formatter = null
     }
+  }
+
+  function updateTime() {
+    if (!formatter) {
+      time.value = ''
+      return
+    }
+
+    time.value = formatter.format(new Date())
   }
 
   function startClock() {
     stopClock()
-    updateTime()
-    intervalId = window.setInterval(updateTime, 1000)
+    unsubscribe = subscribe(updateTime)
   }
 
   function stopClock() {
-    if (intervalId !== null) {
-      clearInterval(intervalId)
-      intervalId = null
+    if (unsubscribe !== null) {
+      unsubscribe()
+      unsubscribe = null
     }
   }
 
   watch(
     timezone,
     (newTimezone) => {
+      updateFormatter()
       if (newTimezone) {
         startClock()
       } else {
@@ -50,17 +60,9 @@ export function useRealtimeClock(timezone: Ref<string | null>) {
     { immediate: true }
   )
 
-  onMounted(() => {
-    if (timezone.value) {
-      startClock()
-    }
-  })
-
   onUnmounted(() => {
     stopClock()
   })
 
-  return {
-    time,
-  }
+  return { time }
 }
