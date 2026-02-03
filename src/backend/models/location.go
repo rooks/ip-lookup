@@ -21,7 +21,6 @@ type LookupResponse struct {
 
 // ErrorResponse represents an error response
 type ErrorResponse struct {
-	Error   string `json:"error"`
 	Code    string `json:"code,omitempty"`
-	Message string `json:"message,omitempty"`
+	Message string `json:"message"`
 }

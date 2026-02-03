@@ -7,9 +7,9 @@ export async function lookupIp(ip: string): Promise<LookupResponse> {
 
   if (!resp.ok) {
     const errorData: ErrorResponse = await resp.json().catch(() => ({
-      error: 'Failed to parse error response',
+      message: 'Failed to parse error response',
     }))
-    throw new Error(errorData.message || errorData.error || 'Lookup failed')
+    throw new Error(errorData.message || 'Lookup failed')
   }
 
   return resp.json()

@@ -13,7 +13,7 @@ export function isValidIp(ip: string): boolean {
 
 export function useIpValidation(ip: Ref<string>) {
   const isValid = computed(() => {
-    if (!ip.value) return true // Empty is not invalid, just empty
+    if (!ip.value) return true // empty, not invalid
     return isValidIp(ip.value)
   })
 

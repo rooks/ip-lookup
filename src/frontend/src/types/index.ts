@@ -7,7 +7,6 @@ export interface LookupResponse {
 }
 
 export interface ErrorResponse {
-  error: string
   code?: string
   message?: string
 }

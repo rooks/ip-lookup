@@ -53,7 +53,6 @@ func (h *LookupHandler) HandleLookup(w http.ResponseWriter, r *http.Request) {
 func (h *LookupHandler) writeError(w http.ResponseWriter, status int, code, message string) {
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(models.ErrorResponse{
-		Error:   message,
 		Code:    code,
 		Message: message,
 	})
