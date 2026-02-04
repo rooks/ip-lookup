@@ -11,10 +11,10 @@ import (
 
 // LookupHandler handles IP lookup requests
 type LookupHandler struct {
-	geoService *services.GeoService
+	geoService services.GeoService
 }
 
-func NewLookupHandler(geoService *services.GeoService) *LookupHandler {
+func NewLookupHandler(geoService services.GeoService) *LookupHandler {
 	return &LookupHandler{
 		geoService: geoService,
 	}

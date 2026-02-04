@@ -13,28 +13,52 @@ import (
 )
 
 const (
-	ipLocateBaseURL = "https://www.iplocate.io/api/lookup"
-	requestTimeout  = 10 * time.Second
+	defaultBaseURL = "https://www.iplocate.io/api/lookup"
+	requestTimeout = 10 * time.Second
 )
 
-// GeoService handles IP geolocation lookups
-type GeoService struct {
-	cache  *expirable.LRU[string, *models.LookupResponse]
-	client *http.Client
+type GeoService interface {
+	ValidateIP(ip string) error
+	Lookup(ip string) (*models.LookupResponse, error)
 }
 
-// NewGeoService creates a new GeoService instance
-func NewGeoService(c *expirable.LRU[string, *models.LookupResponse]) *GeoService {
-	return &GeoService{
-		cache: c,
+type IPLocateService struct {
+	cache   *expirable.LRU[string, *models.LookupResponse]
+	client  *http.Client
+	baseURL string
+}
+
+type IPLocateServiceOption func(*IPLocateService)
+
+func WithBaseURL(url string) IPLocateServiceOption {
+	return func(s *IPLocateService) {
+		s.baseURL = url
+	}
+}
+
+func WithHTTPClient(client *http.Client) IPLocateServiceOption {
+	return func(s *IPLocateService) {
+		s.client = client
+	}
+}
+
+func NewIPLocateService(c *expirable.LRU[string, *models.LookupResponse], opts ...IPLocateServiceOption) *IPLocateService {
+	s := &IPLocateService{
+		cache:   c,
+		baseURL: defaultBaseURL,
 		client: &http.Client{
 			Timeout: requestTimeout,
 		},
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
-// ValidateIP checks if the given string is a valid IP address
-func (s *GeoService) ValidateIP(ip string) error {
+func (s *IPLocateService) ValidateIP(ip string) error {
 	parsed := net.ParseIP(ip)
 	if parsed == nil {
 		return fmt.Errorf("Invalid IP address format")
@@ -44,13 +68,13 @@ func (s *GeoService) ValidateIP(ip string) error {
 }
 
 // Lookup returns geolocation data for the given IP address
-func (s *GeoService) Lookup(ip string) (*models.LookupResponse, error) {
+func (s *IPLocateService) Lookup(ip string) (*models.LookupResponse, error) {
 	if cached, found := s.cache.Get(ip); found {
 		return cached, nil
 	}
 
 	// Make API request
-	url := fmt.Sprintf("%s/%s", ipLocateBaseURL, ip)
+	url := fmt.Sprintf("%s/%s", s.baseURL, ip)
 	resp, err := s.client.Get(url)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch geolocation data: %w", err)
@@ -78,7 +102,6 @@ func (s *GeoService) Lookup(ip string) (*models.LookupResponse, error) {
 		Timezone:    ipLocateResp.Timezone,
 	}
 
-	// Cache the result
 	s.cache.Add(ip, result)
 
 	return result, nil

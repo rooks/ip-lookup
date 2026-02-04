@@ -11,7 +11,7 @@ export function subscribe(callback: TickCallback): () => void {
   subscribers.add(callback)
 
   if (subscribers.size === 1) {
-    tick() // Immediate tick
+    tick()
     intervalId = window.setInterval(tick, 1000)
   }
 

@@ -20,7 +20,7 @@ func main() {
 	}
 
 	cache := expirable.NewLRU[string, *models.LookupResponse](10000, nil, time.Hour)
-	geoService := services.NewGeoService(cache)
+	geoService := services.NewIPLocateService(cache)
 
 	lookupHandler := handlers.NewLookupHandler(geoService)
 
