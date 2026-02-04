@@ -1,7 +1,0 @@
-{
-  "$schema": "https://zeabur.com/schema.json",
-  "build": {
-    "type": "dockerfile"
-  },
-  "port": 8080
-}
