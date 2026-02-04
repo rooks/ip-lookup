@@ -7,6 +7,7 @@ A web application that translates IP addresses into geographic locations, displa
 - Look up multiple IP addresses simultaneously
 - Client-side IP validation
 - Real-time clock display showing local time for each location
+- Country flag emoji display
 - In-memory caching to reduce API calls
 - Loading states and error handling
 
@@ -39,7 +40,8 @@ src/
         ├── components/   # Vue components
         ├── composables/  # Vue composables
         ├── services/     # API client
-        └── types/        # TypeScript types
+        ├── types/        # TypeScript types
+        └── utils/        # Utility functions
 ```
 
 ## Getting Started
@@ -47,7 +49,7 @@ src/
 ### Prerequisites
 
 - Go 1.21+
-- Node.js 18+
+- Node.js 20+
 - npm
 
 ### Development
@@ -78,6 +80,27 @@ npm run build
 cd ../backend
 go run .
 ```
+
+## Testing
+
+**Frontend:**
+```bash
+cd src/frontend
+npm run test        # Watch mode
+npm run test:run    # Single run
+```
+
+**Backend:**
+```bash
+cd src/backend
+go test ./...
+```
+
+## CI/CD
+
+GitHub Actions runs on push/PR to `main`:
+- Backend: build and test
+- Frontend: type check, build, test, and lint
 
 ## API
 
